@@ -1,5 +1,6 @@
 require("core.global")
 require("core.keymap")
+require("core.lsp")
 require("core.option")
 
 require("module.explorer").setup({})
