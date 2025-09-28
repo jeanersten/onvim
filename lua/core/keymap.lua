@@ -12,8 +12,8 @@ vim.keymap.set("n", "<M-Down>",  "<CMD> horizontal resize -1 | set cmdheight=1 <
 vim.keymap.set("n", "<M-Right>", "<CMD> vertical resize +1 | set cmdheight=1 <CR>", opts)
 vim.keymap.set("n", "<M-Left>",  "<CMD> vertical resize -1 | set cmdheight=1 <CR>", opts)
 
-vim.keymap.set("n", "<M-f>", "<CMD> tabnext <CR>", opts)
-vim.keymap.set("n", "<M-d>", "<CMD> tabprevious <CR>", opts)
+vim.keymap.set("n", "<M-x>", "<CMD> tabnext <CR>", opts)
+vim.keymap.set("n", "<M-z>", "<CMD> tabprevious <CR>", opts)
 vim.keymap.set("n", "<M-s>", "<CMD> bnext <CR>", opts)
 vim.keymap.set("n", "<M-a>", "<CMD> bprevious <CR>", opts)
 
