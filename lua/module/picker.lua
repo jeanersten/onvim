@@ -32,7 +32,7 @@ local config = {
   keymap_select_file = "<CR>",
   keymap_quit        = "q",
   max_display   = 100,
-  debounce_time = 1000,
+  debounce_time = 300,
   ignored_directories = { ".git" }
 }
 
@@ -230,7 +230,7 @@ local function update_files()
     vim.fn.timer_stop(state.debounce_timer)
   end
 
-  state.debounce_timer = vim.fn.timer_start(state.debounce_time, function()
+  state.debounce_timer = vim.fn.timer_start(config.debounce_time, function()
     local query = get_prompt_query()
 
     if not query or query == "" then
