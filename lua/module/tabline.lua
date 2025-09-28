@@ -17,9 +17,19 @@ end
 
 local function get_file_name()
   local file_name  = ""
-  local file_flags = "%h%m%r"
+  local file_flags = ""
 
-  file_name = vim.fn.expand("%:.")
+  if vim.bo.filetype == "explorer" then
+    file_name = "- Explorer -"
+  elseif vim.bo.filetype == "picker" then
+    file_name = "- Picker -"
+  elseif vim.bo.filetype == "terminal" then
+    file_name = "- Terminal -"
+  else
+    file_name = vim.fn.expand("%:.")
+    file_flags = "%h%m%r"
+  end
+
   file_name = file_name ~= "" and file_name or "- No Name -"
   file_name = " " .. file_name .. " "
   file_name = file_name .. file_flags
