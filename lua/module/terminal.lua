@@ -90,6 +90,12 @@ local function stop_terminal()
   end
 end
 
+local function attach_keymaps()
+  local opts = { buffer = state.buffer, silent = true }
+
+  vim.keymap.set("n", config.keymap_quit, hide_floating_window, opts)
+end
+
 local function attach_autocmd()
   local group = vim.api.nvim_create_augroup("TerminalProtect", { clear = true })
 
@@ -142,12 +148,6 @@ local function attach_autocmd()
       end)
     end
   })
-end
-
-local function attach_keymaps()
-  local opts = { buffer = state.buffer, silent = true }
-
-  vim.keymap.set("n", config.keymap_quit, hide_floating_window, opts)
 end
 
 function M.toggle()
