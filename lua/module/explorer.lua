@@ -279,18 +279,6 @@ local function get_current_item()
   return state.items[item_index]
 end
 
-local function handle_go_previous_directory()
-  if system.is_root(state.current_directory) then
-    vim.notify("Already at root", vim.log.levels.INFO)
-  end
-
-  local parent = vim.fn.fnamemodify(state.current_directory, ":h")
-
-  state.current_directory = parent
-  update_items()
-  vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
-end
-
 local function handle_item_select()
   local item = get_current_item()
 
@@ -308,108 +296,6 @@ local function handle_item_select()
       vim.cmd("edit " .. vim.fn.fnameescape(item.path))
     end)
   end
-end
-
-local function handle_item_open_in_system()
-  local item = get_current_item()
-
-  if not item then
-    return
-  end
-
-  local command = string.format("%s %s", system.get_open_command(), item.path)
-
-  vim.fn.system(command)
-end
-
-local function handle_item_move()
-  local item = get_current_item()
-
-  if not item or item.name == "." or item.name == ".." then
-    return
-  end
-
-  local parent_directory = vim.fn.fnamemodify(item.path, ":h")
-
-  vim.ui.input({
-    prompt = string.format("Move item '%s' to: ", item.name),
-    default = parent_directory .. system.get_separator(),
-    completion = "dir"
-  }, function(input)
-    if not input or input == "" then
-      vim.notify("Item not moved", vim.log.levels.INFO)
-
-      return
-    end
-
-    local old_path = vim.fn.fnamemodify(item.path, ":p")
-    local new_path = vim.fn.fnamemodify(input, ":p")
-
-    if input:sub(-1) == system.get_separator() then
-      if not vim.fn.isdirectory(new_path) then
-        local ok = vim.fn.mkdir(new_path, "p")
-
-        if ok == 0 then
-          vim.notify(string.format("Failed to create target folder '%s'", new_path), vim.log.levels.ERROR)
-
-          return
-        end
-      end
-
-      new_path = vim.fs.joinpath(new_path, item.name)
-    end
-
-    local function exists_anywhere(p)
-      if system.is_windows() then
-        p = p:gsub("/", "\\")
-      end
-
-      local no_slash = p:gsub("[\\/]+$", "")
-
-      return vim.fn.filereadable(no_slash) == 1 or vim.fn.isdirectory(no_slash) == 1
-    end
-
-    if system.is_windows() then
-      old_path = old_path:gsub("/", "\\")
-      new_path = new_path:gsub("/", "\\")
-    end
-
-    if new_path == old_path then
-      vim.notify("Item target path is the same", vim.log.levels.WARN)
-
-      return
-    elseif exists_anywhere(new_path) then
-      vim.notify("Item already exists", vim.log.levels.ERROR)
-
-      return
-    end
-
-    local ok = vim.uv.fs_rename(old_path, new_path)
-
-    if ok then
-      state.current_directory = vim.fn.fnamemodify(new_path, ":h")
-      update_items()
-      if state.window and vim.api.nvim_win_is_valid(state.window) then
-        local buffer = vim.api.nvim_win_get_buf(state.window)
-        local lines  = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
-
-        local target_name = vim.fn.fnamemodify(new_path, ":t")
-
-        for i, line in ipairs(lines) do
-          local pattern = "%f[%w]" .. vim.pesc(target_name) .. "%f[%W]"
-
-          if line:find(pattern) then
-            vim.api.nvim_win_set_cursor(state.window, { i, 0 })
-            break
-          end
-        end
-      end
-
-      vim.notify(string.format("Item '%s' moved to '%s'", item.name, new_path), vim.log.levels.INFO)
-    else
-      vim.notify(string.format("Failed to move item '%s'", new_path), vim.log.levels.ERROR)
-    end
-  end)
 end
 
 local function handle_item_create()
@@ -527,6 +413,26 @@ local function handle_item_delete()
       local ok = vim.fn.delete(item.path, "rf") == 0
 
       if ok then
+        local buffer = vim.fn.bufnr(item.path)
+
+        if buffer ~= -1 then
+          local windows = vim.fn.win_findbuf(buffer)
+
+          for _, window in ipairs(windows) do
+            vim.api.nvim_win_call(window, function()
+              if #vim.fn.getbufinfo({ buflisted = 1 }) == 1 then
+                vim.cmd("enew")
+              elseif vim.fn.winnr("$") > 1 then
+                vim.cmd("bprevious")
+              else
+                vim.cmd("new")
+              end
+            end)
+          end
+
+          vim.api.nvim_buf_delete(buffer, { force = true })
+        end
+
         update_items()
         vim.notify(string.format("Item '%s' deleted", item.name), vim.log.levels.INFO)
       else
@@ -563,6 +469,129 @@ local function handle_item_delete()
       do_delete()
     end
   end)
+end
+
+local function handle_item_move()
+  local item = get_current_item()
+
+  if not item or item.name == "." or item.name == ".." then
+    return
+  end
+
+  local parent_directory = vim.fn.fnamemodify(item.path, ":h")
+
+  vim.ui.input({
+    prompt = string.format("Move item '%s' to: ", item.name),
+    default = parent_directory .. system.get_separator(),
+    completion = "dir"
+  }, function(input)
+    if not input or input == "" then
+      vim.notify("Item not moved", vim.log.levels.INFO)
+
+      return
+    end
+
+    local old_path = vim.fn.fnamemodify(item.path, ":p")
+    local new_path = vim.fn.fnamemodify(input, ":p")
+
+    if input:sub(-1) == system.get_separator() then
+      if not vim.fn.isdirectory(new_path) then
+        local ok = vim.fn.mkdir(new_path, "p")
+
+        if ok == 0 then
+          vim.notify(string.format("Failed to create target folder '%s'", new_path), vim.log.levels.ERROR)
+
+          return
+        end
+      end
+
+      new_path = vim.fs.joinpath(new_path, item.name)
+    end
+
+    local function exists_anywhere(p)
+      if system.is_windows() then
+        p = p:gsub("/", "\\")
+      end
+
+      local no_slash = p:gsub("[\\/]+$", "")
+
+      return vim.fn.filereadable(no_slash) == 1 or vim.fn.isdirectory(no_slash) == 1
+    end
+
+    if system.is_windows() then
+      old_path = old_path:gsub("/", "\\")
+      new_path = new_path:gsub("/", "\\")
+    end
+
+    if new_path == old_path then
+      vim.notify("Item target path is the same", vim.log.levels.WARN)
+
+      return
+    elseif exists_anywhere(new_path) then
+      vim.notify("Item already exists", vim.log.levels.ERROR)
+
+      return
+    end
+
+    local ok = vim.uv.fs_rename(old_path, new_path)
+
+    if ok then
+      if state.window and vim.api.nvim_win_is_valid(state.window) then
+        local lines  = vim.api.nvim_buf_get_lines(state.buffer, 0, -1, false)
+
+        local target_name = vim.fn.fnamemodify(new_path, ":t")
+
+        for i, line in ipairs(lines) do
+          local pattern = "%f[%w]" .. vim.pesc(target_name) .. "%f[%W]"
+
+          if line:find(pattern) then
+            vim.api.nvim_win_set_cursor(state.window, { i, 0 })
+
+            break
+          end
+        end
+      end
+
+      local buffer = vim.fn.bufnr(item.path)
+
+      if buffer ~= -1 then
+        vim.api.nvim_buf_set_name(buffer, new_path)
+        vim.api.nvim_buf_call(buffer, function()
+          vim.cmd("write!")
+        end)
+      end
+
+      state.current_directory = vim.fn.fnamemodify(new_path, ":h")
+      update_items()
+      vim.notify(string.format("Item '%s' moved to '%s'", item.name, new_path), vim.log.levels.INFO)
+    else
+      vim.notify(string.format("Failed to move item '%s'", new_path), vim.log.levels.ERROR)
+    end
+  end)
+end
+
+local function handle_item_open_in_system()
+  local item = get_current_item()
+
+  if not item then
+    return
+  end
+
+  local command = string.format("%s %s", system.get_open_command(), item.path)
+
+  vim.fn.system(command)
+end
+
+local function handle_go_previous_directory()
+  if system.is_root(state.current_directory) then
+    vim.notify("Already at root", vim.log.levels.INFO)
+  end
+
+  local parent = vim.fn.fnamemodify(state.current_directory, ":h")
+
+  state.current_directory = parent
+  update_items()
+  vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
 end
 
 local function constrain_cursor_position()
