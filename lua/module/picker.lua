@@ -32,7 +32,8 @@ local config = {
   keymap_select_file = "<CR>",
   keymap_quit        = "q",
   max_display   = 100,
-  debounce_time = 1000
+  debounce_time = 1000,
+  ignored_directories = { ".git" }
 }
 
 local function open_floating_window()
@@ -243,7 +244,19 @@ local function update_files()
     local results     = {}
 
     vim.schedule(function()
-      vim.fn.jobstart("rg --files --color never --ignore-case --hidden", {
+      local glob_args = {}
+
+      if #config.ignored_directories > 0 then
+        for _, directory in ipairs(config.ignored_directories) do
+          if directory:gsub("^%s*(.-)%s*$", "%1") ~= "" then
+            table.insert(glob_args, "--glob=!" .. directory .. "/*")
+          end
+        end
+      end
+
+      local cmd = "rg --files --color never --ignore-case --hidden " .. table.concat(glob_args, " ")
+
+      vim.fn.jobstart(cmd, {
         stdout_buffered = true,
         on_stdout = function(_, data)
           if data then
