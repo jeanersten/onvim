@@ -21,7 +21,7 @@ local palette = {
   -- Foreground - Better contrast but not harsh
   fg0     = "#d4d4d4",  -- Main text
   fg1     = "#bfbfbf",  -- Dimmed text
-  fg2     = "#9d9d9d",  -- Comments, line numbers
+  fg2     = "#9d9d9d",  -- Line numbers
   fg3     = "#757575",  -- Very dim text
 
   -- Muted but lighter colors with better contrast
@@ -41,20 +41,20 @@ local palette = {
   success = "#b8d4a8",  -- Soft success color
 }
 
-vim.api.nvim_set_hl(0, "Normal",      { fg = palette.fg0, bg = palette.bg1 })
-vim.api.nvim_set_hl(0, "NormalFloat", { fg = palette.fg0, bg = palette.bg1 })
-vim.api.nvim_set_hl(0, "FloatBorder", { fg = palette.fg3, bg = palette.bg1 })
-vim.api.nvim_set_hl(0, "FloatTitle",  { fg = palette.fg1, bg = palette.bg1, bold = true })
-vim.api.nvim_set_hl(0, "NormalNC",    { fg = palette.fg0, bg = palette.bg1 })
-vim.api.nvim_set_hl(0, "SignColumn",  { fg = palette.fg3, bg = palette.bg1 })
-vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = palette.bg3, bg = palette.bg1 })
+vim.api.nvim_set_hl(0, "Normal",      { fg = palette.fg0, bg = palette.bg0 })
+vim.api.nvim_set_hl(0, "NormalFloat", { fg = palette.fg0, bg = palette.bg0 })
+vim.api.nvim_set_hl(0, "FloatBorder", { fg = palette.fg3, bg = palette.bg0 })
+vim.api.nvim_set_hl(0, "FloatTitle",  { fg = palette.fg1, bg = palette.bg0, bold = true })
+vim.api.nvim_set_hl(0, "NormalNC",    { fg = palette.fg0, bg = palette.bg0 })
+vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = palette.bg3, bg = palette.bg0 })
 
-vim.api.nvim_set_hl(0, "Cursor",       { fg = palette.bg1, bg = palette.fg0 })
+vim.api.nvim_set_hl(0, "Cursor",       { fg = palette.bg0, bg = palette.fg0 })
 vim.api.nvim_set_hl(0, "CursorLine",   { bg = palette.bg3 })
 vim.api.nvim_set_hl(0, "CursorColumn", { bg = palette.bg3 })
-vim.api.nvim_set_hl(0, "ColorColumn",  { bg = palette.bg3 })
+vim.api.nvim_set_hl(0, "ColorColumn",  { bg = palette.bg2 })
 vim.api.nvim_set_hl(0, "CursorLineNr", { fg = palette.accent, bold = true })
-vim.api.nvim_set_hl(0, "LineNr",       { fg = palette.fg3, bg = palette.bg })
+vim.api.nvim_set_hl(0, "LineNr",       { fg = palette.fg2, bg = palette.bg1 })
+vim.api.nvim_set_hl(0, "SignColumn",   { fg = palette.fg2, bg = palette.bg1 })
 
 vim.api.nvim_set_hl(0, "Visual",    { bg = palette.bg7 })
 vim.api.nvim_set_hl(0, "VisualNOS", { bg = palette.bg7 })
@@ -69,8 +69,8 @@ vim.api.nvim_set_hl(0, "Question",   { fg = palette.yellow, bold = true })
 vim.api.nvim_set_hl(0, "ErrorMsg",   { fg = palette.error, bold = true })
 vim.api.nvim_set_hl(0, "WarningMsg", { fg = palette.warning, bold = true })
 
-vim.api.nvim_set_hl(0, "Pmenu",      { fg = palette.fg1, bg = palette.bg3 })
-vim.api.nvim_set_hl(0, "PmenuSel",   { fg = palette.bg1, bg = palette.accent, bold = true })
+vim.api.nvim_set_hl(0, "Pmenu",      { fg = palette.fg1, bg = palette.bg2 })
+vim.api.nvim_set_hl(0, "PmenuSel",   { fg = palette.bg0, bg = palette.accent, bold = true })
 vim.api.nvim_set_hl(0, "PmenuSbar",  { bg = palette.bg4 })
 vim.api.nvim_set_hl(0, "PmenuThumb", { bg = palette.fg3 })
 
@@ -97,7 +97,7 @@ vim.api.nvim_set_hl(0, "SpellCap",   { fg = palette.warning, undercurl = true })
 vim.api.nvim_set_hl(0, "SpellLocal", { fg = palette.cyan, undercurl = true })
 vim.api.nvim_set_hl(0, "SpellRare",  { fg = palette.purple, undercurl = true })
 
-vim.api.nvim_set_hl(0, "Comment", { fg = palette.fg2, italic = true })
+vim.api.nvim_set_hl(0, "Comment", { fg = palette.fg3, italic = true })
 vim.api.nvim_set_hl(0, "Todo",    { fg = palette.warning, bg = palette.bg2, bold = true })
 vim.api.nvim_set_hl(0, "Error",   { fg = palette.error, bold = true })
 
