@@ -1,6 +1,5 @@
 vim.opt.completeopt   = "menuone,popup,noselect"
 vim.opt.confirm       = true
-vim.opt.cursorcolumn  = true
 vim.opt.cursorline    = true
 vim.opt.cursorlineopt = "line"
 vim.opt.expandtab     = true
