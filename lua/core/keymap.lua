@@ -19,6 +19,17 @@ vim.keymap.set("n", "<M-a>", "<CMD> bprevious <CR>", opts)
 
 vim.keymap.set("n", "<M-c>", "<CMD> nohl <CR>", opts)
 
+vim.keymap.set("n", "grb", vim.lsp.buf.declaration, opts)
+vim.keymap.set("n", "grd", vim.lsp.buf.definition, opts)
+vim.keymap.set("n", "grt", vim.lsp.buf.type_definition, opts)
+vim.keymap.set("n", "gri", vim.lsp.buf.implementation, opts)
+vim.keymap.set("n", "grr", vim.lsp.buf.references, opts)
+vim.keymap.set("n", "grs", vim.lsp.buf.document_symbol, opts)
+vim.keymap.set("n", "grh", vim.lsp.buf.signature_help, opts)
+vim.keymap.set("n", "grn", vim.lsp.buf.rename, opts)
+vim.keymap.set("n", "gra", vim.lsp.buf.code_action, opts)
+vim.keymap.set("n", "grf", vim.lsp.buf.format, opts)
+
 vim.keymap.set("n", "<C-u>", "<C-u>zz", opts)
 vim.keymap.set("n", "<C-d>", "<C-d>zz", opts)
 vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", opts)
