@@ -17,5 +17,10 @@ vim.opt.swapfile      = false
 vim.opt.tabstop       = 2
 vim.opt.undofile      = true
 vim.opt.virtualedit   = "block"
+vim.opt.winborder     = "single"
 vim.opt.wrap          = false
 vim.opt.writebackup   = false
+
+if vim.version().prerelease then
+  vim.opt.pumborder = "single"
+end
