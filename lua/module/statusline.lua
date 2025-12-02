@@ -56,10 +56,23 @@ local function get_file_name()
   return file_name
 end
 
+local function get_line_ending()
+  local eol = ({
+    unix = "LF",
+    dos  = "CRLF",
+    mac  = "CR"
+  })[vim.bo.fileformat]
+
+  return eol
+end
+
+get_line_ending()
+
 function M.get_format()
   local mode_name       = get_mode_name()
   local file_name       = get_file_name()
   local cursor_position = "%l:%c:%p%%"
+  local line_ending     = get_line_ending()
   local separator       = config.separator
 
   local format = {}
@@ -79,6 +92,11 @@ function M.get_format()
   table.insert(format, separator)
 
   table.insert(format, "%=")
+
+  table.insert(format, separator)
+  table.insert(format, " ")
+  table.insert(format, line_ending)
+  table.insert(format, " ")
 
   table.insert(format, separator)
   table.insert(format, " ")

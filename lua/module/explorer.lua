@@ -160,7 +160,7 @@ local function render()
   local lines = {}
   local header_icon = ""
 
-  if (state.current_directory:match(state.workspace_directory)) then
+  if state.current_directory:match(vim.pesc(state.workspace_directory)) then
     header_icon = config.icon_header_workspace
   else
     header_icon = config.icon_header_normal
