@@ -54,26 +54,29 @@ local function render()
   clear_guide()
 
   local total_lines = vim.api.nvim_buf_line_count(0)
-
   local virt_text = { { config.symbol, config.highlight } }
-
+  
+  local leftcol = vim.fn.winsaveview().leftcol
+  
   for _, col in ipairs(config.columns) do
-    for line_num = 1, total_lines do
-      local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
+    local win_col = col - leftcol
+    
+    if win_col >= 0 then
+      for line_num = 1, total_lines do
+        local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
+        if line_content then
+          local char_at_col = line_content:sub(col + 1, col + 1)
+          if char_at_col == "" or char_at_col:match("%s") then
+            local extmark_opts = {
+              virt_text = virt_text,
+              virt_text_pos = "overlay",
+              virt_text_win_col = win_col,
+              hl_mode = "combine",
+              priority = 1,
+            }
 
-      if line_content then
-        local char_at_col = line_content:sub(col + 1, col + 1)
-
-        if char_at_col == "" or char_at_col:match("%s") then
-          local extmark_opts = {
-            virt_text = virt_text,
-            virt_text_pos = "overlay",
-            virt_text_win_col = col,
-            hl_mode = "combine",
-            priority = 1,
-          }
-
-          pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, 0, extmark_opts)
+            pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, 0, extmark_opts)
+          end
         end
       end
     end

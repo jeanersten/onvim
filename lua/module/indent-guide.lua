@@ -165,6 +165,8 @@ local function render()
   if not scope then return end
 
   local virt_text = { { config.symbol, config.highlight } }
+  
+  local leftcol = vim.fn.winsaveview().leftcol
 
   for i = scope.top, scope.bottom do
     local line_content = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
@@ -173,14 +175,18 @@ local function render()
       local char_at_indent = line_content:sub(scope.indent + 1, scope.indent + 1)
 
       if char_at_indent == "" or char_at_indent:match("%s") then
-        local extmark_opts = {
-          virt_text = virt_text,
-          virt_text_pos = "overlay",
-          virt_text_win_col = scope.indent,
-          hl_mode = "combine"
-        }
+        local win_col = scope.indent - leftcol
+        
+        if win_col >= 0 then
+          local extmark_opts = {
+            virt_text = virt_text,
+            virt_text_pos = "overlay",
+            virt_text_win_col = win_col,
+            hl_mode = "combine"
+          }
 
-        pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, i - 1, 0, extmark_opts)
+          pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, i - 1, 0, extmark_opts)
+        end
       end
     end
   end
