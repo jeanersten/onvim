@@ -10,7 +10,8 @@ local config = {
   symbol    = "|",
   highlight = "Comment",
   columns   = { 80 },
-  debounce_time = 100
+  debounce_time = 100,
+  mode = "warning"
 }
 
 local function should_render()
@@ -52,11 +53,10 @@ local function render()
   end
 
   clear_guide()
-
-  local total_lines = vim.api.nvim_buf_line_count(0)
-  local virt_text = { { config.symbol, config.highlight } }
   
+  local virt_text = { { config.symbol, config.highlight } }
   local leftcol = vim.fn.winsaveview().leftcol
+  local total_lines = vim.api.nvim_buf_line_count(0)
   
   for _, col in ipairs(config.columns) do
     local win_col = col - leftcol
@@ -64,18 +64,34 @@ local function render()
     if win_col >= 0 then
       for line_num = 1, total_lines do
         local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
+        
         if line_content then
-          local char_at_col = line_content:sub(col + 1, col + 1)
-          if char_at_col == "" or char_at_col:match("%s") then
-            local extmark_opts = {
-              virt_text = virt_text,
-              virt_text_pos = "overlay",
-              virt_text_win_col = win_col,
-              hl_mode = "combine",
-              priority = 1,
-            }
+          if config.mode == "line" then
+            local char_at_col = line_content:sub(col + 1, col + 1)
 
-            pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, 0, extmark_opts)
+            if char_at_col == "" or char_at_col:match("%s") then
+              local extmark_opts = {
+                virt_text = virt_text,
+                virt_text_pos = "overlay",
+                virt_text_win_col = win_col,
+                hl_mode = "combine",
+                priority = 1,
+              }
+
+              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, 0, extmark_opts)
+            end
+          elseif config.mode == "warning" then
+            if #line_content > col then
+              local extmark_opts = {
+                end_line = line_num - 1,
+                end_col = #line_content,
+                hl_group = "WarningMsg",
+                hl_mode = "combine",
+                priority = 100,
+              }
+
+              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, col, extmark_opts)
+            end
           end
         end
       end
