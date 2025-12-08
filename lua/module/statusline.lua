@@ -66,14 +66,17 @@ local function get_line_ending()
   return eol
 end
 
-get_line_ending()
-
 function M.get_format()
+  local bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
+
+  vim.api.nvim_set_hl(0, "SeparatorBG", { fg = bg })
+
+
   local mode_name       = get_mode_name()
   local file_name       = get_file_name()
-  local cursor_position = "%l:%c:%p%%"
+  local cursor_position = "%l:%c %p%%"
   local line_ending     = get_line_ending()
-  local separator       = config.separator
+  local separator       = "%#SeparatorBG#" .. config.separator .. "%*"
 
   local format = {}
 

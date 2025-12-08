@@ -253,10 +253,10 @@ local function render_tree()
                           config.icon_tree_expanded or
                           config.icon_tree_collapsed
 
-      line = string.format("%s%s %s %s%s", indent, expand_icon, icon,
+      line = string.format(". %s%s%s %s%s", indent, expand_icon, icon,
                            item.name, system.get_separator())
     else
-      line = string.format("%s  %s %s", indent, icon, item.name)
+      line = string.format(" %s  %s %s", indent, icon, item.name)
     end
     
     table.insert(lines, line)

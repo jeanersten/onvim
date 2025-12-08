@@ -51,10 +51,14 @@ local function get_tab_number()
 end
 
 function M.get_format()
+  local bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
+
+  vim.api.nvim_set_hl(0, "SeparatorBG", { fg = bg })
+
   local version    = get_version()
   local file_name  = get_file_name()
   local tab_number = get_tab_number()
-  local separator  = config.separator
+  local separator  = "%#SeparatorBG#" .. config.separator .. "%*"
 
   local format = {}
 
@@ -69,7 +73,9 @@ function M.get_format()
 
   table.insert(format, "%=")
 
+  table.insert(format, "%#TabLineSel#")
   table.insert(format, file_name)
+  table.insert(format, "%#TabLine#")
 
   table.insert(format, "%=")
 
