@@ -9,7 +9,10 @@ local state = {
   current_directory   = vim.fn.getcwd(),
   header_row_height   = 3,
   last_cursor_row     = 4,
-  items               = {}
+  items               = {},
+  tree_mode      = true,
+  tree_nodes     = {},
+  expanded_dirs  = {}
 }
 
 local config = {
@@ -19,6 +22,7 @@ local config = {
   border    = "single",
   width     = 80,
   height    = 25,
+  tree_indent = 1,
   icon_header_normal    = "[ND]",
   icon_header_workspace = "[WD]",
   icon_folder_parent    = "[PAR]",
@@ -31,6 +35,8 @@ local config = {
   icon_file_image       = "[IMG]",
   icon_file_executable  = "[EXE]",
   icon_bullet           = ".",
+  icon_tree_expanded    = "-",
+  icon_tree_collapsed   = "+",
   keymap_toggle           = "<M-e>",
   keymap_select_item      = "<CR>",
   keymap_add_item         = "a",
@@ -41,6 +47,7 @@ local config = {
   keymap_go_workspace_dir = "w",
   keymap_go_home_dir      = "~",
   keymap_refresh          = "y",
+  keymap_toggle_tree      = "t",
   keymap_quit             = "q"
 }
 
@@ -156,7 +163,113 @@ local function get_item_icon(item)
   end
 end
 
-local function render()
+local function scan_directory(path, depth)
+  depth = depth or 0
+
+  local items  = {}
+  local handle = vim.uv.fs_scandir(path)
+
+  if not handle then return items end
+  
+  local folders = {}
+  local files = {}
+  
+  while true do
+    local name, type = vim.uv.fs_scandir_next(handle)
+    if not name then break end
+    
+    local item_path = path .. system.get_separator() .. name
+    
+    if type == "directory" then
+      table.insert(folders, {
+        name = name,
+        path = item_path,
+        type = "folder",
+        depth = depth
+      })
+    else
+      table.insert(files, {
+        name = name,
+        path = item_path,
+        type = "file",
+        depth = depth
+      })
+    end
+  end
+  
+  table.sort(folders, function(a, b) return a.name < b.name end)
+  table.sort(files, function(a, b) return a.name < b.name end)
+  
+  for _, folder in ipairs(folders) do
+    table.insert(items, folder)
+  end
+  
+  for _, file in ipairs(files) do
+    table.insert(items, file)
+  end
+  
+  return items
+end
+
+local function build_tree_structure()
+  state.tree_nodes = {}
+  
+  local function add_tree_items(path, depth)
+    local items = scan_directory(path, depth)
+    
+    for _, item in ipairs(items) do
+      table.insert(state.tree_nodes, item)
+      
+      if item.type == "folder" and state.expanded_dirs[item.path] then
+        add_tree_items(item.path, depth + 1)
+      end
+    end
+  end
+  
+  add_tree_items(state.current_directory, 0)
+end
+
+local function render_tree()
+  local lines = {}
+  local header_icon = ""
+
+  if state.current_directory:match(vim.pesc(state.workspace_directory)) then
+    header_icon = config.icon_header_workspace
+  else
+    header_icon = config.icon_header_normal
+  end
+
+  table.insert(lines, "")
+  table.insert(lines, " " .. header_icon .. " " .. state.current_directory)
+  table.insert(lines, "")
+
+  for _, item in ipairs(state.tree_nodes) do
+    local indent = string.rep(" ", item.depth * config.tree_indent)
+    local icon = get_item_icon(item)
+    local line = ""
+    
+    if item.type == "folder" then
+      local expand_icon = state.expanded_dirs[item.path] and
+                          config.icon_tree_expanded or
+                          config.icon_tree_collapsed
+
+      line = string.format("%s%s %s %s%s", indent, expand_icon, icon,
+                           item.name, system.get_separator())
+    else
+      line = string.format("%s  %s %s", indent, icon, item.name)
+    end
+    
+    table.insert(lines, line)
+  end
+
+  if vim.api.nvim_buf_is_valid(state.buffer) then
+    vim.api.nvim_set_option_value("modifiable", true, { buf = state.buffer })
+    vim.api.nvim_buf_set_lines(state.buffer, 0, -1, false, lines)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = state.buffer })
+  end
+end
+
+local function render_list()
   local lines = {}
   local header_icon = ""
 
@@ -185,6 +298,15 @@ local function render()
     vim.api.nvim_set_option_value("modifiable", true, { buf = state.buffer })
     vim.api.nvim_buf_set_lines(state.buffer, 0, -1, false, lines)
     vim.api.nvim_set_option_value("modifiable", false, { buf = state.buffer })
+  end
+end
+
+local function render()
+  if state.tree_mode then
+    build_tree_structure()
+    render_tree()
+  else
+    render_list()
   end
 end
 
@@ -273,11 +395,21 @@ local function get_current_item()
   local line_index = vim.api.nvim_win_get_cursor(state.window)[1]
   local item_index = line_index - state.header_row_height
 
-  if line_index <= state.header_row_height or item_index > #state.items then
+  if line_index <= state.header_row_height then
     return nil
   end
-
-  return state.items[item_index]
+  
+  if state.tree_mode then
+    if item_index > #state.tree_nodes then
+      return nil
+    end
+    return state.tree_nodes[item_index]
+  else
+    if item_index > #state.items then
+      return nil
+    end
+    return state.items[item_index]
+  end
 end
 
 local function handle_item_select()
@@ -288,16 +420,33 @@ local function handle_item_select()
   end
 
   if item.type == "folder" then
-    state.current_directory = item.path
-    update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
-                                                0 })
+    if state.tree_mode then
+      if state.expanded_dirs[item.path] then
+        state.expanded_dirs[item.path] = nil
+      else
+        state.expanded_dirs[item.path] = true
+      end
+      render()
+    else
+      state.current_directory = item.path
+      update_items()
+      vim.api.nvim_win_set_cursor(state.window,
+                                  { state.header_row_height + 1, 0 })
+    end
   else
     hide_floating_window()
     vim.schedule(function()
       vim.cmd("edit " .. vim.fn.fnameescape(item.path))
     end)
   end
+end
+
+local function handle_toggle_tree_mode()
+  state.tree_mode = not state.tree_mode
+  
+  render()
+
+  vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
 end
 
 local function handle_item_create()
@@ -308,11 +457,11 @@ local function handle_item_create()
   end
 
   local base_path = item.type == "folder" and item.path or
-                                 vim.fn.fnamemodify(item.path, ":h")
+                    vim.fn.fnamemodify(item.path, ":h")
 
   vim.ui.input({
-    prompt = string.format("Create new item: %s",
-                           base_path) .. system.get_separator(),
+    prompt = string.format("Create new item: %s", base_path) ..
+                           system.get_separator(),
   }, function(input)
     if not input or input == "" then
       vim.notify("Item not created", vim.log.levels.INFO)
@@ -369,7 +518,9 @@ local function handle_item_create()
       end
     end
 
-    state.current_directory = parent_directory
+    if not state.tree_mode then
+      state.current_directory = parent_directory
+    end
     update_items()
 
     if vim.api.nvim_win_is_valid(state.window) then
@@ -475,11 +626,9 @@ local function handle_item_delete()
           do_delete()
         end)
       else
-
         do_delete()
       end
     else
-
       do_delete()
     end
   end)
@@ -577,7 +726,9 @@ local function handle_item_move()
         end)
       end
 
-      state.current_directory = vim.fn.fnamemodify(new_path, ":h")
+      if not state.tree_mode then
+        state.current_directory = vim.fn.fnamemodify(new_path, ":h")
+      end
       update_items()
       vim.notify(string.format("Item '%s' moved to '%s'", item.name, new_path),
                  vim.log.levels.INFO)
@@ -601,6 +752,11 @@ local function handle_item_open_in_system()
 end
 
 local function handle_go_previous_directory()
+  if state.tree_mode then
+    vim.notify("Use list mode to navigate directories", vim.log.levels.INFO)
+    return
+  end
+  
   if system.is_root(state.current_directory) then
     vim.notify("Already at root", vim.log.levels.INFO)
   end
@@ -609,7 +765,8 @@ local function handle_go_previous_directory()
 
   state.current_directory = parent
   update_items()
-  vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
+  vim.api.nvim_win_set_cursor(state.window,
+                              { state.header_row_height + 1, 0 })
 end
 
 local function constrain_cursor_position()
@@ -618,8 +775,8 @@ local function constrain_cursor_position()
   local column = cursor[2]
 
   if row < state.header_row_height + 1 then
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
-                                                0 })
+    vim.api.nvim_win_set_cursor(state.window,
+                                { state.header_row_height + 1, 0 })
 
     return
   end
@@ -647,19 +804,21 @@ local function attach_keymaps()
 
   vim.keymap.set("n", config.keymap_go_previous_dir,
                  handle_go_previous_directory, opts)
+  
+  vim.keymap.set("n", config.keymap_toggle_tree, handle_toggle_tree_mode, opts)
 
   vim.keymap.set("n", config.keymap_go_workspace_dir, function()
     state.current_directory = state.workspace_directory
     update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
-                                                0 })
+    vim.api.nvim_win_set_cursor(state.window,
+                                { state.header_row_height + 1, 0 })
   end, opts)
 
   vim.keymap.set("n", config.keymap_go_home_dir, function()
     state.current_directory = vim.fn.expand("~")
     update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
-                                                0 })
+    vim.api.nvim_win_set_cursor(state.window,
+                                { state.header_row_height + 1, 0 })
   end, opts)
 
   vim.keymap.set("n", config.keymap_refresh, update_items, opts)
@@ -726,8 +885,9 @@ local function attach_autocmd()
       local mode = vim.api.nvim_get_mode().mode
 
       if mode == "v" or mode == "V" or mode == "\x16" then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true,
-                              false, true), "n", false)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(
+          "<Esc>", true, false, true), "n", false
+        )
       end
     end
   })

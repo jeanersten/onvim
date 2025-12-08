@@ -156,6 +156,31 @@ local function get_scope()
   end
 end
 
+local function should_render()
+  local buftype  = vim.api.nvim_buf_get_option(0, "buftype")
+  local filetype = vim.api.nvim_buf_get_option(0, "filetype")
+
+  if buftype ~= "" then
+    return false
+  end
+
+  local win_config = vim.api.nvim_win_get_config(0)
+
+  if win_config.relative ~= "" then
+    return false
+  end
+
+  local skip_filetypes = { "help", "terminal", "explorer", "picker" }
+
+  for _, ft in ipairs(skip_filetypes) do
+    if filetype == ft then
+      return false
+    end
+  end
+
+  return true
+end
+
 local function clear_guide()
   if not vim.api.nvim_buf_is_valid(0) then return end
 
@@ -163,6 +188,12 @@ local function clear_guide()
 end
 
 local function render()
+  if not should_render() then
+    clear_guide()
+
+    return
+  end
+
   clear_guide()
 
   local scope = get_scope()
