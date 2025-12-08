@@ -7,10 +7,14 @@ vim.keymap.set("n", "<M-k>", "<CMD> wincmd k <CR>", opts)
 vim.keymap.set("n", "<M-j>", "<CMD> wincmd j <CR>", opts)
 vim.keymap.set("n", "<M-l>", "<CMD> wincmd l <CR>", opts)
 vim.keymap.set("n", "<M-h>", "<CMD> wincmd h <CR>", opts)
-vim.keymap.set("n", "<M-Up>",    "<CMD> horizontal resize +1 | set cmdheight=1 <CR>", opts)
-vim.keymap.set("n", "<M-Down>",  "<CMD> horizontal resize -1 | set cmdheight=1 <CR>", opts)
-vim.keymap.set("n", "<M-Right>", "<CMD> vertical resize +1 | set cmdheight=1 <CR>", opts)
-vim.keymap.set("n", "<M-Left>",  "<CMD> vertical resize -1 | set cmdheight=1 <CR>", opts)
+vim.keymap.set("n", "<M-Up>",
+               "<CMD> horizontal resize +1 | set cmdheight=1 <CR>", opts)
+vim.keymap.set("n", "<M-Down>",
+               "<CMD> horizontal resize -1 | set cmdheight=1 <CR>", opts)
+vim.keymap.set("n", "<M-Right>",
+               "<CMD> vertical resize +1 | set cmdheight=1 <CR>", opts)
+vim.keymap.set("n", "<M-Left>",
+               "<CMD> vertical resize -1 | set cmdheight=1 <CR>", opts)
 
 vim.keymap.set("n", "<M-x>", "<CMD> tabnext <CR>", opts)
 vim.keymap.set("n", "<M-z>", "<CMD> tabprevious <CR>", opts)

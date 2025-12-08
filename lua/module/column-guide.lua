@@ -63,7 +63,8 @@ local function render()
     
     if win_col >= 0 then
       for line_num = 1, total_lines do
-        local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
+        local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1,
+                                                        line_num, false)[1]
         
         if line_content then
           if config.mode == "line" then
@@ -78,7 +79,8 @@ local function render()
                 priority = 1,
               }
 
-              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, 0, extmark_opts)
+              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color,
+                    line_num - 1, 0, extmark_opts)
             end
           elseif config.mode == "warning" then
             if #line_content > col then
@@ -90,7 +92,8 @@ local function render()
                 priority = 100,
               }
 
-              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, line_num - 1, col, extmark_opts)
+              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color,
+                    line_num - 1, col, extmark_opts)
             end
           end
         end
@@ -101,7 +104,8 @@ end
 
 local function update()
   vim.loop.timer_stop(state.timer)
-  vim.loop.timer_start(state.timer, config.debounce_time, 0, vim.schedule_wrap(render))
+  vim.loop.timer_start(state.timer, config.debounce_time, 0,
+                       vim.schedule_wrap(render))
 end
 
 local function attach_autocmd()
@@ -115,7 +119,8 @@ local function attach_autocmd()
     end
   })
 
-  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "TextChangedI", "CursorMoved" }, {
+  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged",
+                                "TextChangedI", "CursorMoved" }, {
     group = group,
     pattern = "*",
     callback = function()
@@ -129,7 +134,8 @@ function M.setup(opts)
 
   if config.enable then
     vim.o.colorcolumn = ""
-    vim.api.nvim_set_hl(0, config.highlight, { link = "Comment", default = true })
+    vim.api.nvim_set_hl(0, config.highlight, { link = "Comment",
+                                               default = true })
     state.timer = vim.loop.new_timer()
 
     attach_autocmd()

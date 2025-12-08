@@ -45,7 +45,8 @@ local function open_floating_window()
     buffer_prompt = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_option_value("filetype", "picker", { buf = buffer_prompt })
     vim.api.nvim_set_option_value("buftype", "prompt", { buf = buffer_prompt })
-    vim.fn.prompt_setprompt(buffer_prompt, " " .. config.icon_prompt_search .. ": ")
+    vim.fn.prompt_setprompt(buffer_prompt,
+                            " " .. config.icon_prompt_search .. ": ")
     state.buffer_prompt = buffer_prompt
 
     vim.schedule(function()
@@ -189,7 +190,9 @@ local function render()
   local lines = {}
 
   if #state.files == 0 then
-    lines = { string.format(config.icon_info .. " Nothing to display over here..") }
+    lines = {
+      string.format(config.icon_info .. " Nothing to display over here..")
+    }
   elseif state.loading == true then
     lines = { string.format(config.icon_info .. " Loading..") }
   else
@@ -199,13 +202,16 @@ local function render()
   end
 
   if vim.api.nvim_buf_is_valid(state.buffer_list) then
-    vim.api.nvim_set_option_value("modifiable", true, { buf = state.buffer_list })
+    vim.api.nvim_set_option_value("modifiable", true,
+                                  { buf = state.buffer_list })
     vim.api.nvim_buf_set_lines(state.buffer_list, 0, -1, false, lines)
-    vim.api.nvim_set_option_value("modifiable", false, { buf = state.buffer_list })
+    vim.api.nvim_set_option_value("modifiable", false,
+                                  { buf = state.buffer_list })
     vim.api.nvim_buf_clear_namespace(state.buffer_list, state.ns_dim, 0, -1)
 
     if #state.files == 0 or state.loading == true then
-      vim.api.nvim_buf_add_highlight(state.buffer_list, state.ns_dim, "Comment", 0, 0, -1)
+      vim.api.nvim_buf_add_highlight(state.buffer_list, state.ns_dim,
+                                     "Comment", 0, 0, -1)
     end
   end
 end
@@ -254,7 +260,8 @@ local function update_files()
         end
       end
 
-      local cmd = "rg --files --color never --ignore-case --hidden " .. table.concat(glob_args, " ")
+      local cmd = "rg --files --color never --ignore-case --hidden " ..
+                   table.concat(glob_args, " ")
 
       vim.fn.jobstart(cmd, {
         stdout_buffered = true,
@@ -262,7 +269,8 @@ local function update_files()
           if data then
             for _, path in ipairs(data) do
               if path ~= "" and #results < config.max_display then
-                if path:lower():find(query_lower, 1, true) and vim.fn.filereadable(path) == 1 then
+                if path:lower():find(query_lower, 1, true) and
+                   vim.fn.filereadable(path) == 1 then
                   results[#results + 1] = path
                 end
               end
@@ -352,7 +360,8 @@ local function attach_keymaps()
     navigate_through(-1)
   end, opts)
 
-  vim.keymap.set({ "n", "i" }, config.keymap_select_file, handle_file_select, opts)
+  vim.keymap.set({ "n", "i" }, config.keymap_select_file,
+                 handle_file_select, opts)
 
   vim.keymap.set("n", config.keymap_quit, hide_floating_window, opts)
 
@@ -422,7 +431,8 @@ local function attach_autocmd()
     group = group,
     buffer = state.buffer_prompt,
     callback = function()
-      vim.api.nvim_set_option_value("modified", false, { buf = state.buffer_prompt })
+      vim.api.nvim_set_option_value("modified", false,
+                                    { buf = state.buffer_prompt })
     end
   })
 
@@ -433,7 +443,9 @@ local function attach_autocmd()
       local mode = vim.api.nvim_get_mode().mode
 
       if mode == "v" or mode == "V" or mode == "\x16" then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+        vim.api.nvim_feedkeys(
+          vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false
+        )
       end
     end
   })
@@ -443,7 +455,8 @@ local function attach_autocmd()
     group = group,
     buffer = state.buffer_prompt,
     callback = function()
-      local lines = vim.api.nvim_buf_get_lines(state.buffer_prompt, 0, -1, false)
+      local lines = vim.api.nvim_buf_get_lines(state.buffer_prompt,
+                                               0, -1, false)
       local empty = true
 
       for _, line in ipairs(lines) do
@@ -498,7 +511,8 @@ function M.setup(opts)
   config = vim.tbl_deep_extend("force", config, opts or {})
 
   if config.enable then
-    vim.keymap.set("n", config.keymap_toggle, M.toggle, { desc = "Toggle Picker" })
+    vim.keymap.set("n", config.keymap_toggle, M.toggle,
+                   { desc = "Toggle Picker" })
     vim.api.nvim_create_user_command("Picker", M.toggle, {})
   end
 end

@@ -13,12 +13,14 @@ local config = {
 
 local function save_theme(theme_name)
   local data_path = vim.fn.stdpath("data")
-  local file      = io.open(data_path .. system.get_separator() .. state.file_name, "w")
+  local file      = io.open(data_path .. system.get_separator() ..
+                    state.file_name, "w")
 
   if file then
     file:write(theme_name)
     file:close()
-    vim.notify(string.format("Theme '%s' saved", theme_name), vim.log.levels.INFO)
+    vim.notify(string.format("Theme '%s' saved", theme_name),
+               vim.log.levels.INFO)
   else
     vim.notify("Failed to save theme", vim.log.levels.ERROR)
   end
@@ -28,7 +30,8 @@ local function load_theme()
   pcall(vim.cmd, string.format("colorscheme %s", config.default_theme))
 
   local data_path = vim.fn.stdpath("data")
-  local file      = io.open(data_path .. system.get_separator() .. state.file_name, "r")
+  local file      = io.open(data_path .. system.get_separator() ..
+                    state.file_name, "r")
 
   if file then
     local theme_name = ""
@@ -40,9 +43,11 @@ local function load_theme()
       local ok = pcall(vim.cmd, string.format("colorscheme %s", theme_name))
 
       if ok then
-        vim.notify(string.format("Loaded theme: %s", theme_name), vim.log.levels.INFO)
+        vim.notify(string.format("Loaded theme: %s", theme_name),
+                   vim.log.levels.INFO)
       else
-        vim.notify(string.format("Theme '%s' not found, using default", theme_name), vim.log.levels.WARN)
+        vim.notify(string.format("Theme '%s' not found, using default",
+                   theme_name), vim.log.levels.WARN)
       end
     end
   end
@@ -54,7 +59,8 @@ local function change_theme(theme_name)
   if ok then
     save_theme(theme_name)
   else
-    vim.notify(string.format("Failed to set theme '%s'", theme_name), vim.log.levels.ERROR)
+    vim.notify(string.format("Failed to set theme '%s'", theme_name),
+               vim.log.levels.ERROR)
   end
 end
 

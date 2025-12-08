@@ -41,8 +41,10 @@ local function get_tab_number()
   local tab_number = ""
 
   for i = 1, vim.fn.tabpagenr("$") do
-    local tabline_hl = i == vim.fn.tabpagenr() and "%#TabLineSel#" or "%#TabLine#"
-    tab_number = tab_number .. tabline_hl .. " " .. i .. " " .. "%#TabLineSel#" .. "%#TabLine#"
+    local tabline_hl = i == vim.fn.tabpagenr() and
+                       "%#TabLineSel#" or "%#TabLine#"
+    tab_number = tab_number .. tabline_hl .. " " .. i .. " " ..
+                 "%#TabLineSel#" .. "%#TabLine#"
   end
 
   return tab_number

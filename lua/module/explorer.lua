@@ -171,7 +171,8 @@ local function render()
   table.insert(lines, "")
 
   for _, item in ipairs(state.items) do
-    local line = string.format( config.icon_bullet .. " %s %s", get_item_icon(item), item.name)
+    local line = string.format(config.icon_bullet .. " %s %s",
+                               get_item_icon(item), item.name)
 
     if item.type == "folder" then
       line = line .. system.get_separator()
@@ -289,7 +290,8 @@ local function handle_item_select()
   if item.type == "folder" then
     state.current_directory = item.path
     update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
+    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
+                                                0 })
   else
     hide_floating_window()
     vim.schedule(function()
@@ -305,10 +307,12 @@ local function handle_item_create()
     return
   end
 
-  local base_path = item.type == "folder" and item.path or vim.fn.fnamemodify(item.path, ":h")
+  local base_path = item.type == "folder" and item.path or
+                                 vim.fn.fnamemodify(item.path, ":h")
 
   vim.ui.input({
-    prompt = string.format("Create new item: %s", base_path) .. system.get_separator(),
+    prompt = string.format("Create new item: %s",
+                           base_path) .. system.get_separator(),
   }, function(input)
     if not input or input == "" then
       vim.notify("Item not created", vim.log.levels.INFO)
@@ -326,7 +330,8 @@ local function handle_item_create()
 
       local no_slash = p:gsub("[\\/]+$", "")
 
-      return vim.fn.filereadable(no_slash) == 1 or vim.fn.isdirectory(no_slash) == 1
+      return vim.fn.filereadable(no_slash) == 1 or
+             vim.fn.isdirectory(no_slash) == 1
     end
 
     if system.is_windows() then
@@ -346,16 +351,19 @@ local function handle_item_create()
 
     if is_folder then
       vim.fn.mkdir(path, "p")
-      vim.notify(string.format("Item '%s' created (folder)", path), vim.log.levels.INFO)
+      vim.notify(string.format("Item '%s' created (folder)", path),
+                 vim.log.levels.INFO)
     else
       vim.fn.mkdir(parent_directory, "p")
       local file = io.open(path, "w")
 
       if file then
         file:close()
-        vim.notify(string.format("Item '%s' created (file)", path), vim.log.levels.INFO)
+        vim.notify(string.format("Item '%s' created (file)", path),
+                   vim.log.levels.INFO)
       else
-        vim.notify(string.format("Failed to create item '%s'", path), vim.log.levels.ERROR)
+        vim.notify(string.format("Failed to create item '%s'", path),
+                   vim.log.levels.ERROR)
 
         return
       end
@@ -390,8 +398,10 @@ local function handle_item_delete()
 
   if not item or item.name == "." or item.name == ".." then return end
 
-  if vim.fn.filereadable(item.path) == 0 and vim.fn.isdirectory(item.path) == 0 then
-    vim.notify(string.format("Path '%s' no longer exists", item.path), vim.log.levels.ERROR)
+  if vim.fn.filereadable(item.path) == 0 and
+     vim.fn.isdirectory(item.path) == 0 then
+    vim.notify(string.format("Path '%s' no longer exists", item.path),
+               vim.log.levels.ERROR)
 
     return
   end
@@ -434,9 +444,11 @@ local function handle_item_delete()
         end
 
         update_items()
-        vim.notify(string.format("Item '%s' deleted", item.name), vim.log.levels.INFO)
+        vim.notify(string.format("Item '%s' deleted", item.name),
+                   vim.log.levels.INFO)
       else
-        vim.notify(string.format("Failed to delete item '%s'", item.name), vim.log.levels.ERROR)
+        vim.notify(string.format("Failed to delete item '%s'", item.name),
+                   vim.log.levels.ERROR)
       end
     end
 
@@ -446,7 +458,9 @@ local function handle_item_delete()
 
       if file_count > 0 then
         vim.ui.input({
-          prompt = string.format("Folder contains %d items. Delete anyway? (y/n): ", file_count)
+          prompt = string.format(
+            "Folder contains %d items. Delete anyway? (y/n): ", file_count
+          )
         }, function(confirm)
           if not confirm or confirm == "" or confirm:lower() == "n" then
             vim.notify("Item not deleted", vim.log.levels.INFO)
@@ -499,7 +513,8 @@ local function handle_item_move()
         local ok = vim.fn.mkdir(new_path, "p")
 
         if ok == 0 then
-          vim.notify(string.format("Failed to create target folder '%s'", new_path), vim.log.levels.ERROR)
+          vim.notify(string.format("Failed to create target folder '%s'",
+                     new_path), vim.log.levels.ERROR)
 
           return
         end
@@ -515,7 +530,8 @@ local function handle_item_move()
 
       local no_slash = p:gsub("[\\/]+$", "")
 
-      return vim.fn.filereadable(no_slash) == 1 or vim.fn.isdirectory(no_slash) == 1
+      return vim.fn.filereadable(no_slash) == 1 or
+             vim.fn.isdirectory(no_slash) == 1
     end
 
     if system.is_windows() then
@@ -563,9 +579,11 @@ local function handle_item_move()
 
       state.current_directory = vim.fn.fnamemodify(new_path, ":h")
       update_items()
-      vim.notify(string.format("Item '%s' moved to '%s'", item.name, new_path), vim.log.levels.INFO)
+      vim.notify(string.format("Item '%s' moved to '%s'", item.name, new_path),
+                 vim.log.levels.INFO)
     else
-      vim.notify(string.format("Failed to move item '%s'", new_path), vim.log.levels.ERROR)
+      vim.notify(string.format("Failed to move item '%s'", new_path),
+                 vim.log.levels.ERROR)
     end
   end)
 end
@@ -600,7 +618,8 @@ local function constrain_cursor_position()
   local column = cursor[2]
 
   if row < state.header_row_height + 1 then
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
+    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
+                                                0 })
 
     return
   end
@@ -623,20 +642,24 @@ local function attach_keymaps()
 
   vim.keymap.set("n", config.keymap_move_item, handle_item_move, opts)
 
-  vim.keymap.set("n", config.keymap_open_in_system, handle_item_open_in_system, opts)
+  vim.keymap.set("n", config.keymap_open_in_system,
+                 handle_item_open_in_system, opts)
 
-  vim.keymap.set("n", config.keymap_go_previous_dir, handle_go_previous_directory, opts)
+  vim.keymap.set("n", config.keymap_go_previous_dir,
+                 handle_go_previous_directory, opts)
 
   vim.keymap.set("n", config.keymap_go_workspace_dir, function()
     state.current_directory = state.workspace_directory
     update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
+    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
+                                                0 })
   end, opts)
 
   vim.keymap.set("n", config.keymap_go_home_dir, function()
     state.current_directory = vim.fn.expand("~")
     update_items()
-    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1, 0 })
+    vim.api.nvim_win_set_cursor(state.window, { state.header_row_height + 1,
+                                                0 })
   end, opts)
 
   vim.keymap.set("n", config.keymap_refresh, update_items, opts)
@@ -703,7 +726,8 @@ local function attach_autocmd()
       local mode = vim.api.nvim_get_mode().mode
 
       if mode == "v" or mode == "V" or mode == "\x16" then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true,
+                              false, true), "n", false)
       end
     end
   })
@@ -733,7 +757,8 @@ function M.setup(opts)
 
   if config.enable then
     vim.g.loaded_netrw = 1
-    vim.keymap.set("n", config.keymap_toggle, M.toggle, { desc = "Toggle Explorer" })
+    vim.keymap.set("n", config.keymap_toggle, M.toggle,
+                   { desc = "Toggle Explorer" })
     vim.api.nvim_create_user_command("Explorer", M.toggle, {})
   end
 end

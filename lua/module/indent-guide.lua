@@ -23,7 +23,8 @@ local function get_line_indent(line_num)
     return 0
   end
 
-  local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
+  local line_content = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num,
+                                                  false)[1]
 
   if not line_content or line_content:match("^%s*$") then
     local prev_non_blank = vim.fn.prevnonblank(line_num)
@@ -31,8 +32,10 @@ local function get_line_indent(line_num)
 
     if prev_non_blank == 0 and next_non_blank == 0 then return 0 end
 
-    local prev_indent = prev_non_blank > 0 and vim.fn.indent(prev_non_blank) or 0
-    local next_indent = next_non_blank > 0 and vim.fn.indent(next_non_blank) or prev_indent
+    local prev_indent = prev_non_blank > 0 and
+                        vim.fn.indent(prev_non_blank) or 0
+    local next_indent = next_non_blank > 0 and
+                        vim.fn.indent(next_non_blank) or prev_indent
 
     if next_indent > prev_indent then
       return next_indent
@@ -66,7 +69,8 @@ local function get_scope()
     end
 
     local root = trees[1]:root()
-    local current_node = root:descendant_for_range(current_row, current_col, current_row, current_col)
+    local current_node = root:descendant_for_range(current_row, current_col,
+                                                   current_row, current_col)
 
     if not current_node then
       return nil
@@ -93,7 +97,8 @@ local function get_scope()
         local start_row, _, end_row, _ = node:range()
 
         if end_row > start_row then
-          return { top = start_row + 1, bottom = end_row + 1, indent = get_line_indent(start_row + 1) }
+          return { top = start_row + 1, bottom = end_row + 1,
+                   indent = get_line_indent(start_row + 1) }
         end
       end
 
@@ -172,7 +177,8 @@ local function render()
     local line_content = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
 
     if line_content then
-      local char_at_indent = line_content:sub(scope.indent + 1, scope.indent + 1)
+      local char_at_indent = line_content:sub(scope.indent + 1,
+                                              scope.indent + 1)
 
       if char_at_indent == "" or char_at_indent:match("%s") then
         local win_col = scope.indent - leftcol
@@ -185,7 +191,8 @@ local function render()
             hl_mode = "combine"
           }
 
-          pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, i - 1, 0, extmark_opts)
+          pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color, i - 1, 0,
+                extmark_opts)
         end
       end
     end
@@ -194,7 +201,8 @@ end
 
 local function update()
   vim.loop.timer_stop(state.timer)
-  vim.loop.timer_start(state.timer, config.debounce_time, 0, vim.schedule_wrap(render))
+  vim.loop.timer_start(state.timer, config.debounce_time, 0,
+                       vim.schedule_wrap(render))
 end
 
 local function attach_autocmd()
@@ -208,7 +216,8 @@ local function attach_autocmd()
     end
   })
 
-  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "TextChangedI", "CursorMoved" }, {
+  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged",
+                                "TextChangedI", "CursorMoved" }, {
     group = group,
     pattern = "*",
     callback = function()
@@ -221,7 +230,8 @@ function M.setup(opts)
   config = vim.tbl_deep_extend("force", config, opts or {})
 
   if config.enable then
-    vim.api.nvim_set_hl(0, config.highlight, { link = "Comment", default = true })
+    vim.api.nvim_set_hl(0, config.highlight,
+                        { link = "Comment", default = true })
     state.timer = vim.loop.new_timer()
 
     attach_autocmd()

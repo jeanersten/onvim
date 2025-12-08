@@ -44,7 +44,8 @@ local palette = {
 vim.api.nvim_set_hl(0, "Normal",      { fg = palette.fg0, bg = palette.bg0 })
 vim.api.nvim_set_hl(0, "NormalFloat", { fg = palette.fg0, bg = palette.bg0 })
 vim.api.nvim_set_hl(0, "FloatBorder", { fg = palette.fg3, bg = palette.bg0 })
-vim.api.nvim_set_hl(0, "FloatTitle",  { fg = palette.fg1, bg = palette.bg0, bold = true })
+vim.api.nvim_set_hl(0, "FloatTitle",  { fg = palette.fg1, bg = palette.bg0,
+                                        bold = true })
 vim.api.nvim_set_hl(0, "NormalNC",    { fg = palette.fg0, bg = palette.bg0 })
 vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = palette.bg3, bg = palette.bg0 })
 
@@ -70,15 +71,18 @@ vim.api.nvim_set_hl(0, "ErrorMsg",   { fg = palette.error, bold = true })
 vim.api.nvim_set_hl(0, "WarningMsg", { fg = palette.warning, bold = true })
 
 vim.api.nvim_set_hl(0, "Pmenu",      { fg = palette.fg1, bg = palette.bg2 })
-vim.api.nvim_set_hl(0, "PmenuSel",   { fg = palette.bg0, bg = palette.accent, bold = true })
+vim.api.nvim_set_hl(0, "PmenuSel",   { fg = palette.bg0, bg = palette.accent,
+                                       bold = true })
 vim.api.nvim_set_hl(0, "PmenuSbar",  { bg = palette.bg4 })
 vim.api.nvim_set_hl(0, "PmenuThumb", { bg = palette.fg3 })
 
-vim.api.nvim_set_hl(0, "StatusLine",   { fg = palette.fg0, bg = palette.bg5, bold = true })
+vim.api.nvim_set_hl(0, "StatusLine",   { fg = palette.fg0, bg = palette.bg5,
+                                         bold = true })
 vim.api.nvim_set_hl(0, "StatusLineNC", { fg = palette.fg2, bg = palette.bg6 })
 
 vim.api.nvim_set_hl(0, "TabLine",     { fg = palette.fg0, bg = palette.bg6 })
-vim.api.nvim_set_hl(0, "TabLineSel",  { fg = palette.fg0, bg = palette.bg6, bold = true })
+vim.api.nvim_set_hl(0, "TabLineSel",  { fg = palette.fg0, bg = palette.bg6,
+                                        bold = true })
 vim.api.nvim_set_hl(0, "TabLineFill", { fg = palette.fg3, bg = palette.bg6 })
 
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = palette.bg4 })
@@ -90,7 +94,8 @@ vim.api.nvim_set_hl(0, "FoldColumn", { fg = palette.fg3, bg = palette.bg1 })
 vim.api.nvim_set_hl(0, "DiffAdd",    { fg = palette.green, bg = palette.bg2 })
 vim.api.nvim_set_hl(0, "DiffChange", { fg = palette.yellow, bg = palette.bg2 })
 vim.api.nvim_set_hl(0, "DiffDelete", { fg = palette.red, bg = palette.bg2 })
-vim.api.nvim_set_hl(0, "DiffText",   { fg = palette.orange, bg = palette.bg3, bold = true })
+vim.api.nvim_set_hl(0, "DiffText",   { fg = palette.orange, bg = palette.bg3,
+                                       bold = true })
 
 vim.api.nvim_set_hl(0, "SpellBad",   { fg = palette.error, undercurl = true })
 vim.api.nvim_set_hl(0, "SpellCap",   { fg = palette.warning, undercurl = true })
@@ -98,7 +103,8 @@ vim.api.nvim_set_hl(0, "SpellLocal", { fg = palette.cyan, undercurl = true })
 vim.api.nvim_set_hl(0, "SpellRare",  { fg = palette.purple, undercurl = true })
 
 vim.api.nvim_set_hl(0, "Comment", { fg = palette.fg3, italic = true })
-vim.api.nvim_set_hl(0, "Todo",    { fg = palette.warning, bg = palette.bg2, bold = true })
+vim.api.nvim_set_hl(0, "Todo",    { fg = palette.warning, bg = palette.bg2,
+                                    bold = true })
 vim.api.nvim_set_hl(0, "Error",   { fg = palette.error, bold = true })
 
 vim.api.nvim_set_hl(0, "Constant",  { fg = palette.cyan })
@@ -190,27 +196,40 @@ vim.api.nvim_set_hl(0, "@attribute", { fg = palette.orange })
 vim.api.nvim_set_hl(0, "@property",  { fg = palette.blue })
 
 vim.api.nvim_set_hl(0, "@comment",         { fg = palette.fg2, italic = true })
-vim.api.nvim_set_hl(0, "@comment.todo",    { fg = palette.warning, bg = palette.bg2, bold = true })
-vim.api.nvim_set_hl(0, "@comment.note",    { fg = palette.cyan, bg = palette.bg2, bold = true })
-vim.api.nvim_set_hl(0, "@comment.warning", { fg = palette.warning, bg = palette.bg2, bold = true })
-vim.api.nvim_set_hl(0, "@comment.error",   { fg = palette.error, bg = palette.bg2, bold = true })
+vim.api.nvim_set_hl(0, "@comment.todo",    { fg = palette.warning,
+                                             bg = palette.bg2, bold = true })
+vim.api.nvim_set_hl(0, "@comment.note",    { fg = palette.cyan,
+                                             bg = palette.bg2, bold = true })
+vim.api.nvim_set_hl(0, "@comment.warning", { fg = palette.warning,
+                                             bg = palette.bg2, bold = true })
+vim.api.nvim_set_hl(0, "@comment.error",   { fg = palette.error,
+                                             bg = palette.bg2, bold = true })
 
-vim.api.nvim_set_hl(0, "@markup.heading",       { fg = palette.yellow, bold = true })
+vim.api.nvim_set_hl(0, "@markup.heading",       { fg = palette.yellow,
+                                                  bold = true })
 vim.api.nvim_set_hl(0, "@markup.raw",           { fg = palette.cyan })
 vim.api.nvim_set_hl(0, "@markup.link",          { fg = palette.blue })
-vim.api.nvim_set_hl(0, "@markup.link.url",      { fg = palette.blue, underline = true })
+vim.api.nvim_set_hl(0, "@markup.link.url",      { fg = palette.blue,
+                                                  underline = true })
 vim.api.nvim_set_hl(0, "@markup.link.label",    { fg = palette.cyan })
 vim.api.nvim_set_hl(0, "@markup.list",          { fg = palette.red })
-vim.api.nvim_set_hl(0, "@markup.strong",        { fg = palette.fg0, bold = true })
-vim.api.nvim_set_hl(0, "@markup.italic",        { fg = palette.fg0, italic = true })
-vim.api.nvim_set_hl(0, "@markup.strikethrough", { fg = palette.fg2, strikethrough = true })
+vim.api.nvim_set_hl(0, "@markup.strong",        { fg = palette.fg0,
+                                                  bold = true })
+vim.api.nvim_set_hl(0, "@markup.italic",        { fg = palette.fg0,
+                                                  italic = true })
+vim.api.nvim_set_hl(0, "@markup.strikethrough", { fg = palette.fg2,
+                                                  strikethrough = true })
 
 vim.api.nvim_set_hl(0, "DiagnosticError", { fg = palette.error })
 vim.api.nvim_set_hl(0, "DiagnosticWarn",  { fg = palette.warning })
 vim.api.nvim_set_hl(0, "DiagnosticInfo",  { fg = palette.cyan })
 vim.api.nvim_set_hl(0, "DiagnosticHint",  { fg = palette.fg2 })
 
-vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", { undercurl = true, sp = palette.error })
-vim.api.nvim_set_hl(0, "DiagnosticUnderlineWarn",  { undercurl = true, sp = palette.warning })
-vim.api.nvim_set_hl(0, "DiagnosticUnderlineInfo",  { undercurl = true, sp = palette.cyan })
-vim.api.nvim_set_hl(0, "DiagnosticUnderlineHint",  { undercurl = true, sp = palette.fg2 })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", { undercurl = true,
+                                                     sp = palette.error })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineWarn",  { undercurl = true,
+                                                     sp = palette.warning })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineInfo",  { undercurl = true,
+                                                     sp = palette.cyan })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineHint",  { undercurl = true,
+                                                     sp = palette.fg2 })

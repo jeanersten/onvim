@@ -165,7 +165,8 @@ function M.setup(opts)
   config = vim.tbl_deep_extend("force", config, opts or {})
 
   if config.enable then
-    vim.keymap.set("n", config.keymap_toggle, M.toggle, { desc = "Toggle Terminal" })
+    vim.keymap.set("n", config.keymap_toggle, M.toggle,
+                   { desc = "Toggle Terminal" })
     vim.api.nvim_create_user_command("Terminal", M.toggle, {})
   end
 end
