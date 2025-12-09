@@ -10,7 +10,7 @@ local state = {
   header_row_height   = 3,
   last_cursor_row     = 4,
   items               = {},
-  tree_mode      = true,
+  tree_mode      = false,
   tree_nodes     = {},
   expanded_dirs  = {}
 }
@@ -256,7 +256,7 @@ local function render_tree()
       line = string.format(". %s%s%s %s%s", indent, expand_icon, icon,
                            item.name, system.get_separator())
     else
-      line = string.format(" %s  %s %s", indent, icon, item.name)
+      line = string.format(". %s %s %s", indent, icon, item.name)
     end
     
     table.insert(lines, line)
@@ -304,6 +304,17 @@ end
 local function render()
   if state.tree_mode then
     build_tree_structure()
+    
+    if #state.tree_nodes == 0 then
+      state.tree_mode = false
+      render_list() 
+
+      vim.notify("Folder is empty, can't switch to tree mode",
+                 vim.log.levels.INFO)
+
+      return
+    end
+
     render_tree()
   else
     render_list()
@@ -537,7 +548,7 @@ local function handle_item_create()
           target_line = i
         end
       end
-      if target_line then
+      if target_line and not state.tree_mode then
         vim.api.nvim_win_set_cursor(state.window, { target_line, 0 })
       end
     end
@@ -709,7 +720,7 @@ local function handle_item_move()
         for i, line in ipairs(lines) do
           local pattern = "%f[%w]" .. vim.pesc(target_name) .. "%f[%W]"
 
-          if line:find(pattern) then
+          if line:find(pattern) and not state.tree_mode then
             vim.api.nvim_win_set_cursor(state.window, { i, 0 })
 
             break
