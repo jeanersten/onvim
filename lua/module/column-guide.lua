@@ -2,7 +2,8 @@ local M = {}
 
 local state = {
   timer    = nil,
-  ns_color = vim.api.nvim_create_namespace("ColumnGuideColorNS")
+  ns_color = vim.api.nvim_create_namespace("ColumnGuideColorNS"),
+  notified = {}
 }
 
 local config = {
@@ -48,7 +49,6 @@ end
 local function render()
   if not should_render() then
     clear_guide()
-
     return
   end
 
@@ -57,6 +57,10 @@ local function render()
   local virt_text = { { config.symbol, config.highlight } }
   local leftcol = vim.fn.winsaveview().leftcol
   local total_lines = vim.api.nvim_buf_line_count(0)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local has_long_lines = false
+  local longest_line = 0
+  local longest_line_num = 0
   
   for _, col in ipairs(config.columns) do
     local win_col = col - leftcol
@@ -71,6 +75,7 @@ local function render()
             local char_at_col = line_content:sub(col + 1, col + 1)
 
             if char_at_col == "" or char_at_col:match("%s") then
+
               local extmark_opts = {
                 virt_text = virt_text,
                 virt_text_pos = "overlay",
@@ -78,27 +83,36 @@ local function render()
                 hl_mode = "combine",
                 priority = 1,
               }
-
               pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color,
                     line_num - 1, 0, extmark_opts)
             end
           elseif config.mode == "warning" then
             if #line_content > col then
-              local extmark_opts = {
-                end_line = line_num - 1,
-                end_col = #line_content,
-                hl_group = "WarningMsg",
-                hl_mode = "combine",
-                priority = 100,
-              }
+              has_long_lines = true
 
-              pcall(vim.api.nvim_buf_set_extmark, 0, state.ns_color,
-                    line_num - 1, col, extmark_opts)
+              if #line_content > longest_line then
+                longest_line = #line_content
+                longest_line_num = line_num
+              end
             end
           end
         end
       end
     end
+  end
+  
+  if config.mode == "warning" and has_long_lines then
+    if not state.notified[bufnr] then
+      local msg = string.format(
+        "Warning: Lines exceed %d columns (longest: line %d with %d chars)",
+        config.columns[1], longest_line_num, longest_line
+      )
+
+      vim.notify(msg, vim.log.levels.WARN, { title = "Column Guide" })
+      state.notified[bufnr] = true
+    end
+  else
+    state.notified[bufnr] = nil
   end
 end
 
@@ -110,7 +124,6 @@ end
 
 local function attach_autocmd()
   local group = vim.api.nvim_create_augroup("ColumnGuide", { clear = true })
-
   vim.api.nvim_create_autocmd("BufLeave", {
     group = group,
     pattern = "*",
@@ -118,13 +131,20 @@ local function attach_autocmd()
       clear_guide()
     end
   })
-
   vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged",
                                 "TextChangedI", "CursorMoved" }, {
     group = group,
     pattern = "*",
     callback = function()
       update()
+    end
+  })
+  
+  vim.api.nvim_create_autocmd("BufDelete", {
+    group = group,
+    pattern = "*",
+    callback = function(args)
+      state.notified[args.buf] = nil
     end
   })
 end
@@ -137,7 +157,6 @@ function M.setup(opts)
     vim.api.nvim_set_hl(0, config.highlight, { link = "Comment",
                                                default = true })
     state.timer = vim.loop.new_timer()
-
     attach_autocmd()
   end
 end
