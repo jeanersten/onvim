@@ -260,8 +260,15 @@ local function update_files()
         end
       end
 
-      local cmd = "rg --files --color never --ignore-case --hidden " ..
-                   table.concat(glob_args, " ")
+      local cmd = { "rg", "--files", "--color", "never", "--hidden" }
+
+      if #config.ignored_directories > 0 then
+        for _, directory in ipairs(config.ignored_directories) do
+          if directory:gsub("^%s*(.-)%s*$", "%1") ~= "" then
+            table.insert(cmd, "--glob=!" .. directory .. "/*")
+          end
+        end
+      end
 
       vim.fn.jobstart(cmd, {
         stdout_buffered = true,
